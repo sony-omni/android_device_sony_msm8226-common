@@ -14,8 +14,6 @@
 
 include device/sony/common/BoardConfigCommon.mk
 
-PRODUCT_VENDOR_KERNEL_HEADERS := device/sony/msm8226-common/kernel-headers
-
 TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv7-a-neon
 TARGET_BOARD_PLATFORM := msm8226
@@ -29,7 +27,7 @@ TARGET_NO_RADIOIMAGE := true
 TARGET_NO_RECOVERY := false
 TARGET_NO_KERNEL := false
 
-TARGET_KERNEL_SOURCE := kernel/sony/msm8974
+TARGET_KERNEL_SOURCE := kernel/sony/eagle
 
 BOARD_KERNEL_BASE        := 0x00000000
 BOARD_KERNEL_PAGESIZE    := 2048
@@ -39,8 +37,8 @@ BOARD_RAMDISK_OFFSET     := 0x02000000
 BOARD_KERNEL_BOOTIMG := true
 BOARD_KERNEL_SEPARATED_DT := true
 BOARD_CUSTOM_BOOTIMG_MK := device/sony/msm8226-common/boot/custombootimg.mk
-
-BOARD_MKBOOTIMG_ARGS := --ramdisk_offset $(BOARD_RAMDISK_OFFSET) --tags_offset $(BOARD_KERNEL_TAGS_OFFSET)
+BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x02000000 --tags_offset 0x01E00000
+TARGET_DTB_EXTRA_FLAGS := --force-v2
 
 BOARD_KERNEL_CMDLINE := console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 androidboot.hardware=yukon user_debug=31 msm_rtb.filter=0x37 androidboot.selinux=permissive
 
@@ -64,11 +62,15 @@ OVERRIDE_RS_DRIVER := libRSDriver_adreno.so
 BOARD_EGL_CFG := device/sony/msm8226-common/rootdir/system/lib/egl/egl.cfg
 
 BOARD_USES_QCOM_HARDWARE := true
+TARGET_USES_QCOM_BSP := true
+TARGET_QCOM_AUDIO_VARIANT := caf-bfam
+TARGET_QCOM_DISPLAY_VARIANT := caf-bfam
+TARGET_QCOM_MEDIA_VARIANT := caf-bfam
+COMMON_GLOBAL_CFLAGS += -DQCOM_HARDWARE
 
 BOARD_USES_GENERIC_AUDIO := false
 BOARD_USES_ALSA_AUDIO := true
 
-USE_CAMERA_STUB := false
 TARGET_USES_ION := true
 USE_DEVICE_SPECIFIC_CAMERA := true
 
