@@ -20,6 +20,7 @@ on early-init
     mount debugfs debugfs /sys/kernel/debug
 
     mkdir /firmware 0771 system system
+    chmod 666 /proc/cmdline
 
     # Set permissions for persist partition
     mkdir /persist 0771 system system
