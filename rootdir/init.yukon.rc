@@ -55,6 +55,17 @@ on fs
     mount_all ./fstab.yukon
     setprop ro.crypto.fuse_sdcard true
     write /sys/kernel/boot_adsp/boot 1
+    mount ext4 /dev/block/platform/msm_sdcc.1/by-name/persist /persist nosuid nodev barrier=1
+
+    mkdir /lta-label 0555 system system
+    mount ext4 /dev/block/platform/msm_sdcc.1/by-name/LTALabel /lta-label nosuid nodev noatime noexec ro barrier=0
+    chown system system /lta-label
+    chmod 0555 /lta-label
+
+    wait /dev/block/platform/msm_sdcc.1/by-name/modem
+    mount vfat /dev/block/platform/msm_sdcc.1/by-name/modem /firmware ro shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337
+
+    restorecon_recursive /persist
 
 # msm specific files that need to be created on /data
 on post-fs-data
