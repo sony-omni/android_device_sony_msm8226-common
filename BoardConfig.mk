@@ -62,6 +62,7 @@ OVERRIDE_RS_DRIVER := libRSDriver_adreno.so
 BOARD_EGL_CFG := device/sony/msm8226-common/rootdir/system/lib/egl/egl.cfg
 
 BOARD_USES_QCOM_HARDWARE := true
+TARGET_USE_QCOM_BIONIC_OPTIMIZATION := true
 TARGET_USES_QCOM_BSP := true
 TARGET_QCOM_AUDIO_VARIANT := caf
 TARGET_QCOM_DISPLAY_VARIANT := caf
