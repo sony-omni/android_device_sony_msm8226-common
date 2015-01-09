@@ -98,7 +98,7 @@ PRODUCT_PACKAGES += \
 
 # Power
 PRODUCT_PACKAGES += \
-    power.yukon
+    power.qcom
 
 #GPS
 PRODUCT_PACKAGES += \
