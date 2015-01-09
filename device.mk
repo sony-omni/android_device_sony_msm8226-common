@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# qcom common
+$(call inherit-product, device/sony/qcom-common/qcom-common.mk)
+
 SOMC_PLATFORM := yukon
 
 DEVICE_PACKAGE_OVERLAYS += \
@@ -76,6 +79,10 @@ PRODUCT_PACKAGES += \
     libtinyalsa \
     libtinycompress \
     libaudioroute
+
+# Time
+PRODUCT_PACKAGES += \
+    libtime_genoff
 
 #GFX
 PRODUCT_PACKAGES += \
@@ -155,3 +162,5 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.vendor.extension_library=/vendor/lib/libqc-opt.so
 
+# msm8226 common
+$(call inherit-product, vendor/sony/msm8226-common/msm8226-common-vendor.mk)

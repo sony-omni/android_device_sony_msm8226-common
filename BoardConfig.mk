@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# inherit from qcom-common
+include device/sony/qcom-common/BoardConfigCommon.mk
+
 include device/sony/common/BoardConfigCommon.mk
 
 TARGET_ARCH := arm
@@ -68,6 +71,7 @@ TARGET_QCOM_AUDIO_VARIANT := caf-bfam
 TARGET_QCOM_DISPLAY_VARIANT := caf-bfam
 TARGET_QCOM_MEDIA_VARIANT := caf-bfam
 COMMON_GLOBAL_CFLAGS += -DQCOM_HARDWARE -DQCOM_BSP
+TARGET_RUNNING_WITHOUT_SYNC_FRAMEWORK := true
 
 BOARD_USES_GENERIC_AUDIO := false
 BOARD_USES_ALSA_AUDIO := true
