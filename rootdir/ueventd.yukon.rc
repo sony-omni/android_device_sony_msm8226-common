@@ -15,6 +15,9 @@
 #permissions for CSVT
 /dev/smd11                0660   radio      radio
 
+#permissions for wifi
+/dev/rfkill               0660   wifi       wifi
+
 /dev/radio0               0640   system     system
 /dev/rfcomm0              0660   bluetooth  bluetooth
 /dev/smdcntl0             0640   radio      radio

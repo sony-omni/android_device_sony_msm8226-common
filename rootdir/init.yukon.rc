@@ -84,6 +84,10 @@ on post-fs-data
     mkdir /data/misc/dhcp 0770 dhcp dhcp
     chown dhcp system /data/misc/dhcp
 
+    # Update WIFI MAC address
+    mkdir /data/misc/wifi/prima 0775 wifi wifi
+    exec /system/bin/mac-update
+
     #Create directory for hostapd
     mkdir /data/hostapd 0770 system wifi
 
