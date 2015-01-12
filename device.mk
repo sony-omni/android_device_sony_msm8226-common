@@ -171,5 +171,18 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.vendor.extension_library=/vendor/lib/libqc-opt.so
 
+# Audio Configuration
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.qc.sdk.audio.fluencetype=fluence \
+    persist.audio.fluence.voicecall=true \
+    af.resampler.quality=4 \
+    audio.offload.buffer.size.kb=32 \
+    audio.offload.gapless.enabled=true \
+    use.voice.path.for.pcm.voip=true \
+    av.offload.enable=true \
+    av.streaming.offload.enable=true \
+    audio.offload.pcm.enable=true \
+    persist.sys.media.use-awesome=true
+
 # msm8226 common
 $(call inherit-product, vendor/sony/msm8226-common/msm8226-common-vendor.mk)
