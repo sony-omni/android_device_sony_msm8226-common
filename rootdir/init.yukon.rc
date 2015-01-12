@@ -291,7 +291,7 @@ on boot
     write /sys/bus/msm_subsys/devices/subsys3/restart_level "related"
 
     #WCNSS enable
-    write /dev/wcnss_wlan 1
+    chown system system /dev/wcnss_wlan
 
 #SONY misc
 service ta_qmi_service /system/bin/ta_qmi_service
@@ -340,6 +340,12 @@ service thermanager /system/bin/thermanager /system/etc/thermanager.xml
     class main
     user root
     group root
+
+service wcnss_init /system/bin/sh /system/etc/init.yukon.wifi.sh
+    class main
+    user system
+    group system wifi
+    oneshot
 
 #WCNSS service
 service wcnss-service /system/bin/wcnss_service
