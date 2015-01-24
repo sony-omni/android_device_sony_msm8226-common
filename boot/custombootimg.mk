@@ -5,10 +5,10 @@ $(uncompressed_ramdisk): $(INSTALLED_RAMDISK_TARGET)
 	zcat $< > $@
 
 INITSH := device/sony/msm8226-common/boot/init.sh
-BOOTREC_DEVICE := device/sony/msm8226-common/boot/bootrec-device
+BOOTREC_DEVICE := $(PRODUCT_OUT)/recovery/bootrec-device
 
 KERNEL_CONFIG := $(KERNEL_OUT)/.config
-DTS_NAMES ?= msm8926-yukon_eagle-720p-mtp
+DTS_NAMES ?= msm8926-720p-mtp
 DTS_FILES = $(wildcard $(TOP)/$(KERNEL_SRC)/arch/arm/boot/dts/$(DTS_NAME)*.dts)
 DTS_FILE = $(lastword $(subst /, ,$(1)))
 DTB_FILE = $(addprefix $(KERNEL_OUT)/arch/arm/boot/,$(patsubst %.dts,%.dtb,$(call DTS_FILE,$(1))))
@@ -24,7 +24,7 @@ $(foreach DTS_NAME, $(DTS_NAMES), \
       cat $(KERNEL_ZIMG) $(call DTB_FILE,$(d)) > $(call ZIMG_FILE,$(d));))
 endef
 
-DTBTOOL := $(HOST_OUT_EXECUTABLES)/dtbTool$(HOST_EXECUTABLE_SUFFIX)
+DTBTOOL := $(HOST_OUT_EXECUTABLES)/dtbToolAL$(HOST_EXECUTABLE_SUFFIX)
 INSTALLED_DTIMAGE_TARGET := $(PRODUCT_OUT)/dt.img
 
 INSTALLED_BOOTIMAGE_TARGET := $(PRODUCT_OUT)/boot.img
