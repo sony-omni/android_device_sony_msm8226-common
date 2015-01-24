@@ -30,6 +30,3 @@ wifi.interface=wlan0
 ro.wifi.eap_sim_enabled=true
 wlan.driver.ath=0
 wlan.driver.config=/system/etc/firmware/wlan/prima/WCNSS_qcom_cfg.ini
-ro.qc.sdk.gestures.camera=false
-camera2.portability.force_api=1
-
