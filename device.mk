@@ -56,7 +56,6 @@ PRODUCT_COPY_FILES += \
 
 # NFC
 PRODUCT_COPY_FILES += \
-    $(SONY_ROOT)/system/etc/libnfc-nxp.conf:system/etc/libnfc-nxp.conf \
     $(SONY_ROOT)/system/etc/nfcee_access.xml:system/etc/nfcee_access.xml \
     frameworks/native/data/etc/android.hardware.nfc.xml:system/etc/permissions/android.hardware.nfc.xml \
     frameworks/native/data/etc/android.hardware.nfc.hce.xml:system/etc/permissions/android.hardware.nfc.hce.xml \
@@ -121,10 +120,18 @@ PRODUCT_PACKAGES += \
 
 #Wifi
 PRODUCT_PACKAGES += \
+    libQWiFiSoftApCfg \
+    libqsap_sdk \
     hostapd \
     libwpa_client \
     wpa_supplicant \
     wpa_supplicant.conf
+
+PRODUCT_PROPERTY_OVERRIDES += \
+    wlan.driver.ath=0
+
+PRODUCT_COPY_FILES += \
+    $(SONY_ROOT)/system/etc/hostapd/hostapd_default.conf:system/etc/hostapd/hostapd_default.conf
 
 #Misc
 PRODUCT_PACKAGES += \
@@ -169,6 +176,3 @@ PRODUCT_PROPERTY_OVERRIDES += \
 # QC Perf
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.vendor.extension_library=/vendor/lib/libqc-opt.so
-
-# msm8226 common
-$(call inherit-product, vendor/sony/msm8226-common/msm8226-common-vendor.mk)
