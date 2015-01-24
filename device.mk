@@ -30,12 +30,10 @@ PRODUCT_COPY_FILES += \
     $(SONY_ROOT)/system/usr/keylayout/gpio-keys.kl:system/usr/keylayout/gpio-keys.kl \
     $(SONY_ROOT)/system/etc/wifi/wpa_supplicant_overlay.conf:system/etc/wifi/wpa_supplicant_overlay.conf \
     $(SONY_ROOT)/system/etc/wifi/p2p_supplicant_overlay.conf:system/etc/wifi/p2p_supplicant_overlay.conf \
+    $(SONY_ROOT)/system/etc/init.qcom.fm.sh:system/etc/init.qcom.fm.sh \
     $(SONY_ROOT)/system/etc/init.yukon.bt.sh:system/etc/init.yukon.bt.sh \
     $(SONY_ROOT)/system/etc/init.yukon.wifi.sh:system/etc/init.yukon.wifi.sh \
     $(SONY_ROOT)/system/etc/gps.conf:system/etc/gps.conf \
-    $(SONY_ROOT)/system/etc/audio_policy.conf:system/etc/audio_policy.conf \
-    $(SONY_ROOT)/system/etc/media_codecs.xml:system/etc/media_codecs.xml \
-    $(SONY_ROOT)/system/etc/media_profiles.xml:system/etc/media_profiles.xml \
     device/sony/msm8226-common/boot/bootrec-device:recovery/bootrec-device
 
 # Copy extra files
@@ -54,6 +52,14 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml \
     frameworks/native/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
     frameworks/native/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml
+
+PRODUCT_COPY_FILES += \
+    $(SONY_ROOT)/system/etc/audio_policy.conf:system/etc/audio_policy.conf \
+    $(SONY_ROOT)/system/etc/media_codecs.xml:system/etc/media_codecs.xml \
+    $(SONY_ROOT)/system/etc/media_profiles.xml:system/etc/media_profiles.xml \
+    frameworks/av/media/libstagefright/data/media_codecs_google_audio.xml:system/etc/media_codecs_google_audio.xml \
+    frameworks/av/media/libstagefright/data/media_codecs_google_telephony.xml:system/etc/media_codecs_google_telephony.xml \
+    frameworks/av/media/libstagefright/data/media_codecs_google_video.xml:system/etc/media_codecs_google_video.xml
 
 # NFC
 PRODUCT_COPY_FILES += \
@@ -84,6 +90,13 @@ PRODUCT_PACKAGES += \
 # Time
 PRODUCT_PACKAGES += \
     libtime_genoff
+
+# FM radio
+#PRODUCT_PACKAGES += \
+#    qcom.fmradio \
+#    libqcomfm_jni \
+#    FM2 \
+#    FMRecord
 
 #GFX
 PRODUCT_PACKAGES += \
