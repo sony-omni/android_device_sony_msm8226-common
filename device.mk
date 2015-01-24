@@ -177,3 +177,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
 # QC Perf
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.vendor.extension_library=/vendor/lib/libqc-opt.so
+
+# msm8226 common
+$(call inherit-product, vendor/sony/msm8226-common/msm8226-common-vendor.mk)
