@@ -1,0 +1,54 @@
+ifneq (,$(findstring $(PLATFORM_VERSION), 4.4 4.4.1 4.4.2 4.4.3))
+LOCAL_PATH:= $(call my-dir)
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:= \
+    qcamera_test.cpp \
+
+LOCAL_SHARED_LIBRARIES:= \
+    libdl \
+    libui \
+    libutils \
+    libcutils \
+    libbinder \
+    libmedia \
+    libui \
+    libgui \
+    libcamera_client \
+    libskia \
+    libstagefright \
+    libstagefright_foundation \
+
+ifneq (1,$(filter 1,$(shell echo "$$(( $(PLATFORM_SDK_VERSION) >= 18 ))" )))
+
+LOCAL_SHARED_LIBRARIES += \
+    libmedia_native \
+
+LOCAL_CFLAGS += -DUSE_JB_MR1
+
+endif
+
+LOCAL_C_INCLUDES += \
+    frameworks/base/include/ui \
+    frameworks/base/include/surfaceflinger \
+    frameworks/base/include/camera \
+    frameworks/base/include/media \
+    external/skia/include/core \
+    external/skia/include/images \
+    frameworks/av/include/media/stagefright \
+    frameworks/native/include/media/openmax \
+
+ifneq ($(TARGET_QCOM_DISPLAY_VARIANT),)
+    LOCAL_C_INCLUDES        += hardware/qcom/display-$(TARGET_QCOM_DISPLAY_VARIANT)/libgralloc
+else
+    LOCAL_C_INCLUDES        += hardware/qcom/display/libgralloc
+endif
+LOCAL_MODULE:= camera_test
+LOCAL_MODULE_TAGS:= tests
+
+LOCAL_CFLAGS += -Wall -fno-short-enums -O0
+
+include $(BUILD_EXECUTABLE)
+
+endif
