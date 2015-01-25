@@ -98,6 +98,10 @@ PRODUCT_PACKAGES += \
     libqcomvoiceprocessingdescriptors \
     libqcompostprocbundle
 
+# Camera
+PRODUCT_PACKAGES += \
+    camera.yukon
+
 # Time
 PRODUCT_PACKAGES += \
     libtime_genoff
