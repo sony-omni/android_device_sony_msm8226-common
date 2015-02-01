@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2014, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@ static void jpeg_encode_cb(jpeg_job_status_t status,
                            mm_jpeg_output_t *p_buf,
                            void *userData)
 {
-    uint32_t i = 0;
+    int i = 0;
     mm_camera_test_obj_t *pme = NULL;
     CDBG("%s: BEGIN\n", __func__);
 
@@ -116,10 +116,6 @@ int encodeData(mm_camera_test_obj_t *test_obj, mm_camera_super_buf_t* recvd_fram
     /* fill in sink img param */
     job.encode_job.dst_index = 0;
 
-    if (test_obj->metadata != NULL) {
-      job.encode_job.p_metadata = test_obj->metadata;
-    }
-
     rc = test_obj->jpeg_ops.start_job(&job, &test_obj->current_job_id);
     if ( 0 != rc ) {
         free(test_obj->current_job_frames);
@@ -178,7 +174,7 @@ int createEncodingSession(mm_camera_test_obj_t *test_obj,
 static void mm_app_snapshot_metadata_notify_cb(mm_camera_super_buf_t *bufs,
   void *user_data)
 {
-  uint32_t i = 0;
+  int i = 0;
   mm_camera_channel_t *channel = NULL;
   mm_camera_stream_t *p_stream = NULL;
   mm_camera_test_obj_t *pme = (mm_camera_test_obj_t *)user_data;
@@ -193,10 +189,6 @@ static void mm_app_snapshot_metadata_notify_cb(mm_camera_super_buf_t *bufs,
       break;
     }
   }
-  if (NULL == channel) {
-      CDBG_ERROR("%s: Wrong channel id", __func__);
-      return;
-  }
   /* find preview stream */
   for (i = 0; i < channel->num_streams; i++) {
     if (channel->streams[i].s_config.stream_info->stream_type == CAM_STREAM_TYPE_METADATA) {
@@ -204,11 +196,6 @@ static void mm_app_snapshot_metadata_notify_cb(mm_camera_super_buf_t *bufs,
       break;
     }
   }
-  if (NULL == p_stream) {
-      CDBG_ERROR("%s: Wrong preview stream", __func__);
-      return;
-  }
-
   /* find preview frame */
   for (i = 0; i < bufs->num_bufs; i++) {
     if (bufs->bufs[i]->stream_id == p_stream->s_id) {
@@ -225,19 +212,7 @@ static void mm_app_snapshot_metadata_notify_cb(mm_camera_super_buf_t *bufs,
     /* The app will free the metadata, we don't need to bother here */
     pme->metadata = malloc(sizeof(cam_metadata_info_t));
   }
-
-  /* find meta data frame */
-  mm_camera_buf_def_t *meta_frame = NULL;
-  for (i = 0; i < bufs->num_bufs; i++) {
-    if (bufs->bufs[i]->stream_type == CAM_STREAM_TYPE_METADATA) {
-      meta_frame = bufs->bufs[i];
-      break;
-    }
-  }
-  /* fill in meta data frame ptr */
-  if (meta_frame != NULL) {
-    pme->metadata = (cam_metadata_info_t *)meta_frame->buffer;
-  }
+  memcpy(pme->metadata , frame->buffer, sizeof(cam_metadata_info_t));
 
   pMetadata = (cam_metadata_info_t *)frame->buffer;
 
@@ -246,9 +221,6 @@ static void mm_app_snapshot_metadata_notify_cb(mm_camera_super_buf_t *bufs,
 
     if (focus_data->focus_state == CAM_AF_FOCUSED) {
       CDBG_ERROR("%s: AutoFocus Done Call Back Received\n",__func__);
-      mm_camera_app_done();
-    } else if (focus_data->focus_state == CAM_AF_NOT_FOCUSED) {
-      CDBG_ERROR("%s: AutoFocus failed\n",__func__);
       mm_camera_app_done();
     }
   }
@@ -267,7 +239,7 @@ static void mm_app_snapshot_notify_cb_raw(mm_camera_super_buf_t *bufs,
 {
 
     int rc;
-    uint32_t i = 0;
+    int i = 0;
     mm_camera_test_obj_t *pme = (mm_camera_test_obj_t *)user_data;
     mm_camera_channel_t *channel = NULL;
     mm_camera_stream_t *m_stream = NULL;
@@ -335,7 +307,7 @@ static void mm_app_snapshot_notify_cb(mm_camera_super_buf_t *bufs,
 {
 
     int rc = 0;
-    uint32_t i = 0;
+    int i = 0;
     mm_camera_test_obj_t *pme = (mm_camera_test_obj_t *)user_data;
     mm_camera_channel_t *channel = NULL;
     mm_camera_stream_t *p_stream = NULL;
@@ -670,7 +642,7 @@ int mm_app_take_picture(mm_camera_test_obj_t *test_obj, uint8_t is_burst_mode)
 {
     CDBG_HIGH("\nEnter %s!!\n",__func__);
     int rc = MM_CAMERA_OK;
-    uint8_t num_snapshot = 1;
+    int num_snapshot = 1;
     int num_rcvd_snapshot = 0;
 
     if (is_burst_mode)

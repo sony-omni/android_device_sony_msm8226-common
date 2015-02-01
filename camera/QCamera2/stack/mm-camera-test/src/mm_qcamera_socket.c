@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2014, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -33,16 +33,17 @@
 #define IP_ADDR                  "127.0.0.1"
 #define TUNING_CHROMATIX_PORT     55555
 #define TUNING_PREVIEW_PORT       55556
+#define TUNESERVER_STOP_CODE      1234
 
 #define CURRENT_COMMAND_ACK_SUCCESS 1
 #define CURRENT_COMMAND_ACK_FAILURE 2
 
 pthread_t eztune_thread_id;
 
-static ssize_t tuneserver_send_command_rsp(tuningserver_t *tsctrl,
+static int tuneserver_send_command_rsp(tuningserver_t *tsctrl,
   char *send_buf, uint32_t send_len)
 {
-  ssize_t rc;
+  int rc;
 
   /* send ack back to client upon req */
   if (send_len <= 0) {
@@ -76,9 +77,9 @@ static void release_eztune_prevcmd_rsp(eztune_prevcmd_rsp *pHead)
   }
 }
 
-static ssize_t tuneserver_ack(uint16_t a, uint32_t b, tuningserver_t *tsctrl)
+static int tuneserver_ack(uint16_t a, uint32_t b, tuningserver_t *tsctrl)
 {
-  ssize_t rc;
+  int rc;
   char ack_1[6];
   /*Ack the command here*/
   memcpy(ack_1, &a, 2);
@@ -95,10 +96,9 @@ static ssize_t tuneserver_ack(uint16_t a, uint32_t b, tuningserver_t *tsctrl)
   return 0;
 }
 
-static ssize_t tuneserver_send_command_ack( uint8_t ack,
-    tuningserver_t *tsctrl)
+static int tuneserver_send_command_ack( uint8_t ack, tuningserver_t *tsctrl)
 {
-  ssize_t rc;
+  int rc;
   /* send ack back to client upon req */
   rc = send(tsctrl->clientsocket_id, &ack, sizeof(ack), 0);
   if (rc < 0) {
@@ -191,6 +191,9 @@ static int32_t tuneserver_process_command(tuningserver_t *tsctrl,
     }
     break;
   }
+
+  case TUNESERVER_STOP:
+      return TUNESERVER_STOP_CODE;
 
   default:
     if(tuneserver_send_command_ack(CURRENT_COMMAND_ACK_SUCCESS, tsctrl)) {
@@ -285,9 +288,9 @@ static int32_t tuneserver_process_client_message(void *recv_buffer,
  *
  *  Return: >=0 on success, -1 on failure.
  **/
-static ssize_t tuneserver_ack_onaccept_initprotocol(tuningserver_t *tsctrl)
+static int32_t tuneserver_ack_onaccept_initprotocol(tuningserver_t *tsctrl)
 {
-  ssize_t rc = 0;
+  int32_t rc = 0;
   uint32_t ack_status;
 
   ALOGE("%s starts\n", __func__);
@@ -339,10 +342,10 @@ static void tuneserver_check_status(tuningserver_t *tsctrl)
 }
 #endif
 
-static ssize_t prevserver_send_command_rsp(tuningserver_t *tsctrl,
+static int prevserver_send_command_rsp(tuningserver_t *tsctrl,
   char *send_buf, uint32_t send_len)
 {
-  ssize_t rc;
+  int rc;
 
   /* send ack back to client upon req */
   if (send_len <= 0) {
@@ -544,17 +547,17 @@ static int32_t prevserver_process_client_message(void *recv_buffer,
 int tunning_server_socket_listen(const char* ip_addr, uint16_t port)
 {
   int sock_fd = -1;
-  mm_qcamera_sock_addr_t server_addr;
+  struct sockaddr_in server_addr;
   int result;
   int option;
   int socket_flag;
 
   memset(&server_addr, 0, sizeof(server_addr));
-  server_addr.addr_in.sin_family = AF_INET;
-  server_addr.addr_in.sin_port = (__be16) htons(port);
-  server_addr.addr_in.sin_addr.s_addr = inet_addr(ip_addr);
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_port= htons(port);
+  server_addr.sin_addr.s_addr = inet_addr(ip_addr);
 
-  if (server_addr.addr_in.sin_addr.s_addr == INADDR_NONE) {
+  if (server_addr.sin_addr.s_addr == INADDR_NONE) {
     ALOGE("[ERR] %s invalid address.\n", __func__);
     return -1;
   }
@@ -582,7 +585,7 @@ int tunning_server_socket_listen(const char* ip_addr, uint16_t port)
     return sock_fd;
   }
 
-  result = bind(sock_fd, &server_addr.addr, sizeof(server_addr.addr_in));
+  result = bind(sock_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
   if (result < 0) {
     ALOGE("eztune socket bind failed");
     close(sock_fd);
@@ -615,14 +618,14 @@ void *eztune_proc(void *data)
   int server_socket = -1, client_socket = -1;
   int prev_server_socket = -1, prev_client_socket = -1;
 
-  mm_qcamera_sock_addr_t addr_client_inet;
-  socklen_t addr_client_len = sizeof(addr_client_inet.addr_in);
+  struct sockaddr_in addr_client_inet;
+  socklen_t addr_client_len = sizeof(struct sockaddr_in);
   int result;
   fd_set tsfds;
   int num_fds = 0;
-  ssize_t recv_bytes;
+  int recv_bytes;
   char buf[TUNESERVER_MAX_RECV];
-
+  int server_socket_read = 0;
   mm_camera_lib_handle *lib_handle = (mm_camera_lib_handle *)data;
 
   ALOGE(">>> Starting tune server <<< \n");
@@ -666,7 +669,7 @@ void *eztune_proc(void *data)
       CDBG("Receiving New client connection\n");
 
       client_socket = accept(server_socket,
-        &addr_client_inet.addr, &addr_client_len);
+        (struct sockaddr *)&addr_client_inet, &addr_client_len);
       if (client_socket == -1) {
         ALOGE("accept failed %s", strerror(errno));
         continue;
@@ -692,6 +695,7 @@ void *eztune_proc(void *data)
         close(server_socket);
         return NULL;
       }
+      server_socket_read = 1;
       lib_handle->tsctrl.clientsocket_id = client_socket;
       if (tuneserver_ack_onaccept_initprotocol(&lib_handle->tsctrl) < 0) {
         ALOGE("%s: Error while acking\n", __func__);
@@ -711,7 +715,7 @@ void *eztune_proc(void *data)
       /*Receive message and process it*/
       recv_bytes = recv(client_socket, (void *)buf,
         lib_handle->tsctrl.proto->next_recv_len, 0);
-      CDBG("Receive %lld bytes \n", (long long int) recv_bytes);
+      CDBG("Receive %d bytes \n", recv_bytes);
 
       if (recv_bytes == -1) {
         ALOGE("%s: Receive failed with error %s\n", __func__, strerror(errno));
@@ -745,6 +749,9 @@ void *eztune_proc(void *data)
           //tuneserver_check_status(&tsctrl);
           continue;
         }
+        else if (result == TUNESERVER_STOP_CODE) {
+            break;
+        }
       }
     }
 
@@ -753,9 +760,11 @@ void *eztune_proc(void *data)
      */
     if (FD_ISSET(prev_server_socket, &tsfds)) {
       CDBG("Receiving New Preview client connection\n");
-
+      if (server_socket_read != 1) {
+          continue;
+      }
       prev_client_socket = accept(prev_server_socket,
-        &addr_client_inet.addr, &addr_client_len);
+        (struct sockaddr *)&addr_client_inet, &addr_client_len);
       if (prev_client_socket == -1) {
         ALOGE("accept failed %s", strerror(errno));
         continue;
@@ -801,7 +810,7 @@ void *eztune_proc(void *data)
         lib_handle->tsctrl.pr_proto->next_recv_len, 0);
 
       CDBG("%s prev_client_socket=%d\n", __func__, prev_client_socket);
-      CDBG("%s next_recv_len=%d\n", __func__, buf[0]+buf[1]*256);
+      CDBG("%s next_recv_len=%d\n", __func__, *(uint16_t *)buf);
 
       if (recv_bytes <= 0) {
         if (recv_bytes == 0) {
@@ -842,6 +851,16 @@ void *eztune_proc(void *data)
     }
   } while (1);
 
+  tuneserver_deinitialize_tuningp(&lib_handle->tsctrl, client_socket,
+      lib_handle->tsctrl.proto->send_buf,
+      lib_handle->tsctrl.proto->send_len);
+  tuneserver_deinitialize_prevtuningp(&lib_handle->tsctrl,
+      (char **)&lib_handle->tsctrl.proto->send_buf,
+      &lib_handle->tsctrl.proto->send_len);
+
+  free(lib_handle->tsctrl.proto);
+  lib_handle->tsctrl.proto = NULL;
+
   if (server_socket > 0) {
     close(server_socket);
   }
@@ -854,8 +873,32 @@ void *eztune_proc(void *data)
   if (prev_client_socket > 0) {
     close(prev_client_socket);
   }
-
+  lib_handle = 0;
   return EXIT_SUCCESS;
+}
+
+/*===========================================================================
+ * FUNCTION   : eztune_server_stop
+ *
+ * DESCRIPTION: To stop the eztune server and close all the sockets
+ *
+ * PARAMETERS :
+ *   @data  : ptr to camera lib handle
+ *
+ * RETURN     : None
+ *==========================================================================*/
+void eztune_server_stop(void *data)
+{
+    int rc =0;
+    mm_camera_lib_handle *lib_handle = (mm_camera_lib_handle *)data;
+    if (lib_handle->tsctrl.clientsocket_id > 0) {
+        lib_handle->tsctrl.proto->current_cmd = TUNESERVER_STOP;
+        lib_handle->tsctrl.proto->next_recv_code = TUNESERVER_RECV_RESPONSE;
+        rc = send(lib_handle->tsctrl.clientsocket_id,
+                 lib_handle->tsctrl.proto->send_buf,
+                 lib_handle->tsctrl.proto->send_len, 0);
+        rc = pthread_join(eztune_thread_id,NULL);
+    }
 }
 
 int eztune_server_start (void *lib_handle)

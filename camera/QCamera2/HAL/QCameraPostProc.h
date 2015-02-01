@@ -47,19 +47,12 @@ typedef struct {
     uint32_t client_hdl;             // handle of jpeg client (obtained when open jpeg)
     mm_camera_super_buf_t *src_frame;// source frame (need to be returned back to kernel after done)
     mm_camera_super_buf_t *src_reproc_frame; // original source frame for reproc if not NULL
-    cam_metadata_info_t * metadata;  // source frame metadata
-    bool reproc_frame_release;       // false release original buffer,
-                                     // true don't release it
-    mm_camera_buf_def_t *src_reproc_bufs;
     QCameraExif *pJpegExifObj;
 } qcamera_jpeg_data_t;
 
 typedef struct {
     uint32_t jobId;                  // job ID
-    mm_camera_super_buf_t *src_frame;// source frame
-    bool reproc_frame_release;       // false release original buffer
-                                     // true don't release it
-    mm_camera_buf_def_t *src_reproc_bufs;
+    mm_camera_super_buf_t *src_frame;// source frame (need to be returned back to kernel after done)
 } qcamera_pp_data_t;
 
 typedef struct {
@@ -122,11 +115,7 @@ public:
     int32_t processJpegEvt(qcamera_jpeg_evt_payload_t *evt);
     int32_t getJpegPaddingReq(cam_padding_info_t &padding_info);
     QCameraReprocessChannel * getReprocChannel() {return m_pReprocChannel;};
-    bool getMultipleStages() { return mMultipleStages; };
-    void setMultipleStages(bool stages) { mMultipleStages = stages; };
-    inline bool getJpegMemOpt() {return mJpegMemOpt;}
-    inline void setJpegMemOpt(bool val) {mJpegMemOpt = val;}
-    QCameraStream* getReprocStream() {return m_reprocStream;}
+
 private:
     int32_t sendDataNotify(int32_t msg_type,
                            camera_memory_t *data,
@@ -142,13 +131,6 @@ private:
                                   QCameraStream *thumb_stream);
     int32_t encodeData(qcamera_jpeg_data_t *jpeg_job_data,
                        uint8_t &needNewSess);
-    int32_t queryStreams(QCameraStream **main,
-            QCameraStream **thumb,
-            mm_camera_buf_def_t **main_image,
-            mm_camera_buf_def_t **thumb_image,
-            mm_camera_super_buf_t *main_frame,
-            mm_camera_super_buf_t *reproc_frame);
-    int32_t syncStreamParams(mm_camera_super_buf_t *frame);
     void releaseSuperBuf(mm_camera_super_buf_t *super_buf);
     static void releaseNotifyData(void *user_data,
                                   void *cookie,
@@ -169,20 +151,18 @@ private:
     static bool matchJobId(void *data, void *user_data, void *match_data);
     static int getJpegMemory(omx_jpeg_ouput_buf_t *out_buf);
 
-    int32_t reprocess(qcamera_pp_data_t *pp_job);
-    int32_t stopCapture();
-
 private:
     QCamera2HardwareInterface *m_parent;
     jpeg_encode_callback_t     mJpegCB;
     void *                     mJpegUserData;
+    mm_jpeg_ops_t              mJpegHandle;
+    uint32_t                   mJpegClientHandle;
     uint32_t                   mJpegSessionId;
 
     void *                     m_pJpegOutputMem[MM_JPEG_MAX_BUF];
     QCameraExif *              m_pJpegExifObj;
-    uint32_t                   m_bThumbnailNeeded;
+    int8_t                     m_bThumbnailNeeded;
     QCameraReprocessChannel *  m_pReprocChannel;
-    QCameraReprocessChannel *  m_pDualReprocChannel;
 
     int8_t                     m_bInited; // if postproc is inited
 
@@ -194,21 +174,13 @@ private:
     QCameraQueue m_inputSaveQ;          // input save job queue
     QCameraCmdThread m_dataProcTh;      // thread for data processing
     QCameraCmdThread m_saveProcTh;      // thread for storing buffers
+    uint32_t mRawBurstCount;            // current raw burst count
     uint32_t mSaveFrmCnt;               // save frame counter
     static const char *STORE_LOCATION;  // path for storing buffers
     bool mUseSaveProc;                  // use store thread
     bool mUseJpegBurst;                 // use jpeg burst encoding mode
     bool mJpegMemOpt;
-    uint8_t mNewJpegSessionNeeded;
-    bool mMultipleStages;               // multiple stages are present
     uint32_t   m_JpegOutputMemCount;
-    QCameraStream *m_reprocStream;
-
-public:
-    mm_jpeg_ops_t   mJpegHandle;
-    uint32_t        mJpegClientHandle;
-    cam_dimension_t m_dst_dim;
-    cam_dimension_t m_src_dim;
 };
 
 }; // namespace qcamera

@@ -109,11 +109,6 @@ typedef struct {
     };
 } qcamera_api_result_t;
 
-typedef struct api_result_list {
-   qcamera_api_result_t result;
-   struct api_result_list *next;
-}api_result_list;
-
 // definition for payload type of setting callback
 typedef struct {
     camera_notify_callback notify_cb;
@@ -143,7 +138,6 @@ typedef enum {
     QCAMERA_INTERNAL_EVT_HISTOGRAM_STATS,    // histogram
     QCAMERA_INTERNAL_EVT_CROP_INFO,          // crop info
     QCAMERA_INTERNAL_EVT_ASD_UPDATE,         // asd update result
-    QCAMERA_INTERNAL_EVT_AWB_UPDATE,         // awb update result
     QCAMERA_INTERNAL_EVT_MAX
 } qcamera_internal_evt_type_t;
 
@@ -156,7 +150,6 @@ typedef struct {
         cam_hist_stats_t stats_data;
         cam_crop_data_t crop_data;
         cam_auto_scene_t asd_data;
-        cam_awb_params_t awb_data;
     };
 } qcamera_sm_internal_evt_payload_t;
 
@@ -169,7 +162,6 @@ public:
     int32_t procEvt(qcamera_sm_evt_enum_t evt, void *evt_payload);
 
     bool isPreviewRunning(); // check if preview is running
-    bool isPreviewReady(); // check if preview is ready
     bool isCaptureRunning(); // check if image capture is running
     bool isNonZSLCaptureRunning(); // check if image capture is running in non ZSL mode
 
