@@ -85,15 +85,12 @@
         <item>1</item>
     </integer-array>
 
-    <!-- Flag indicating whether or not hardware automatic brightness is available.
-         If config_hardware_auto_brightness is set to true, then hardware automatic brightness
-         will be used instead of software automatic brightness. -->
-    <!-- <bool name="config_hardware_auto_brightness_available">true</bool> -->
-
-    <!-- Flag indicating whether the we should enable the automatic brightness in Settings. -->
+    <!-- Flag indicating whether the we should enable the automatic brightness in Settings.
+         Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">true</bool>
 
-    <!-- Allow backlight brightness to go down to 10 -->
+    <!-- Minimum screen brightness setting allowed by the power manager.
+         The user is forbidden from setting the brightness below this level. -->
     <integer name="config_screenBrightnessSettingMinimum">10</integer>
 
     <!-- DeskDock uses 90 degrees rotation and no accelerometer -->

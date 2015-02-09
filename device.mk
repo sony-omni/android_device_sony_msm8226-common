@@ -34,10 +34,14 @@ PRODUCT_COPY_FILES += \
     $(SONY_ROOT)/system/etc/init.yukon.bt.sh:system/etc/init.yukon.bt.sh \
     $(SONY_ROOT)/system/etc/init.yukon.wifi.sh:system/etc/init.yukon.wifi.sh \
     $(SONY_ROOT)/system/etc/gps.conf:system/etc/gps.conf \
-    device/sony/msm8226-common/boot/bootrec-device:recovery/bootrec-device
-
+    device/sony/msm8226-common/boot/bootrec-device:recovery/bootrec-device \
+    $(SONY_ROOT)/system/etc/sec_config:system/etc/sec_config \
+    $(SONY_ROOT)/system/etc/gps.conf:system/etc/gps.conf
+ 
+>>>>>>> e4bc71ee8b0f1424ee0dd344dde265c0ff45dc04
 # Copy extra files
 PRODUCT_COPY_FILES += \
+    frameworks/native/data/etc/android.hardware.audio.low_latency.xml:system/etc/permissions/android.hardware.audio.low_latency.xml \
     frameworks/native/data/etc/android.hardware.camera.flash-autofocus.xml:system/etc/permissions/android.hardware.camera.flash-autofocus.xml \
     frameworks/native/data/etc/android.hardware.camera.front.xml:system/etc/permissions/android.hardware.camera.front.xml \
     frameworks/native/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml \
@@ -54,6 +58,7 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml
 
 PRODUCT_COPY_FILES += \
+    $(SONY_ROOT)/system/etc/audio_effects.conf:system/etc/audio_effects.conf \
     $(SONY_ROOT)/system/etc/audio_policy.conf:system/etc/audio_policy.conf \
     $(SONY_ROOT)/system/etc/media_codecs.xml:system/etc/media_codecs.xml \
     $(SONY_ROOT)/system/etc/media_profiles.xml:system/etc/media_profiles.xml \
@@ -87,6 +92,13 @@ PRODUCT_PACKAGES += \
     libtinycompress \
     libaudioroute
 
+# Audio effects
+PRODUCT_PACKAGES += \
+    libqcomvisualizer \
+    libqcomvoiceprocessing \
+    libqcomvoiceprocessingdescriptors \
+    libqcompostprocbundle
+
 # Time
 PRODUCT_PACKAGES += \
     libtime_genoff
@@ -102,6 +114,7 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     copybit.msm8226 \
     gralloc.msm8226 \
+    copybit.msm8226 \
     hwcomposer.msm8226 \
     memtrack.msm8226 \
     libgenlock \
@@ -119,6 +132,21 @@ PRODUCT_PACKAGES += \
     Tag \
     nfc_nci.pn54x.default
 
+
+# Omx
+PRODUCT_PACKAGES += \
+    libOmxAacEnc \
+    libOmxAmrEnc \
+    libOmxCore \
+    libOmxEvrcEnc \
+    libOmxQcelp13Enc \
+    libOmxVdec \
+    libOmxVenc \
+    libc2dcolorconvert \
+    libdashplayer \
+    libdivxdrmdecrypt \
+    libmm-omxcore \
+    libstagefrighthw
 
 # Power
 PRODUCT_PACKAGES += \
@@ -164,8 +192,7 @@ PRODUCT_PACKAGES += \
 
 #Charger
 PRODUCT_PACKAGES += \
-    charger \
-    charger_res_images \
+    charger_res_images
 
 PRODUCT_PACKAGES += \
     librs_jni \
