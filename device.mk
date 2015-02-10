@@ -38,7 +38,6 @@ PRODUCT_COPY_FILES += \
     $(SONY_ROOT)/system/etc/sec_config:system/etc/sec_config \
     $(SONY_ROOT)/system/etc/gps.conf:system/etc/gps.conf
  
->>>>>>> e4bc71ee8b0f1424ee0dd344dde265c0ff45dc04
 # Copy extra files
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.audio.low_latency.xml:system/etc/permissions/android.hardware.audio.low_latency.xml \
