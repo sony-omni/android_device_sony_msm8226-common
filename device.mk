@@ -98,10 +98,6 @@ PRODUCT_PACKAGES += \
     libqcomvoiceprocessingdescriptors \
     libqcompostprocbundle
 
-# Camera
-PRODUCT_PACKAGES += \
-    camera.msm8226
-
 # Time
 PRODUCT_PACKAGES += \
     libtime_genoff
