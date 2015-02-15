@@ -30,8 +30,9 @@ endif
 
 LOCAL_C_INCLUDES := \
         $(LOCAL_PATH)/../stack/common \
+        frameworks/native/include/media/hardware \
         frameworks/native/include/media/openmax \
-        hardware/qcom/display-$(TARGET_QCOM_DISPLAY_VARIANT)/libgralloc \
+        hardware/qcom/display/-$(TARGET_QCOM_DISPLAY_VARIANT)libgralloc \
         hardware/qcom/media-$(TARGET_QCOM_DISPLAY_VARIANT)/libstagefrighthw \
         $(LOCAL_PATH)/../../mm-image-codec/qexif \
         $(LOCAL_PATH)/../../mm-image-codec/qomx_core \
@@ -63,4 +64,3 @@ LOCAL_MODULE_TAGS := optional
 include $(BUILD_SHARED_LIBRARY)
 
 include $(LOCAL_PATH)/test/Android.mk
-

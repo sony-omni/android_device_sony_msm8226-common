@@ -35,6 +35,8 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <linux/media.h>
+#include <signal.h>
+#include <media/msm_cam_sensor.h>
 #include <cutils/properties.h>
 #include <stdlib.h>
 
@@ -571,6 +573,80 @@ static int32_t mm_camera_intf_qbuf(uint32_t camera_handle,
 }
 
 /*===========================================================================
+ * FUNCTION   : mm_camera_intf_get_queued_buf_count
+ *
+ * DESCRIPTION: returns the queued buffer count
+ *
+ * PARAMETERS :
+ *   @camera_handle: camera handle
+ *   @ch_id        : channel handle
+ *   @stream_id : stream id
+ *
+ * RETURN     : int32_t - queued buffer count
+ *
+ *==========================================================================*/
+static int32_t mm_camera_intf_get_queued_buf_count(uint32_t camera_handle,
+        uint32_t ch_id, uint32_t stream_id)
+{
+    int32_t rc = -1;
+    mm_camera_obj_t * my_obj = NULL;
+
+    pthread_mutex_lock(&g_intf_lock);
+    my_obj = mm_camera_util_get_camera_by_handler(camera_handle);
+
+    if(my_obj) {
+        pthread_mutex_lock(&my_obj->cam_lock);
+        pthread_mutex_unlock(&g_intf_lock);
+        rc = mm_camera_get_queued_buf_count(my_obj, ch_id, stream_id);
+    } else {
+        pthread_mutex_unlock(&g_intf_lock);
+    }
+    CDBG("%s :X queued buffer count = %d",__func__,rc);
+    return rc;
+}
+
+/*===========================================================================
+ * FUNCTION   : mm_camera_intf_link_stream
+ *
+ * DESCRIPTION: link a stream into a new channel
+ *
+ * PARAMETERS :
+ *   @camera_handle: camera handle
+ *   @ch_id        : channel handle
+ *   @stream_id    : stream id
+ *   @linked_ch_id : channel in which the stream will be linked
+ *
+ * RETURN     : uint32_t type of stream handle
+ *              0  -- invalid stream handle, meaning the op failed
+ *              >0 -- successfully linked a stream with a valid handle
+ *==========================================================================*/
+static int32_t mm_camera_intf_link_stream(uint32_t camera_handle,
+        uint32_t ch_id,
+        uint32_t stream_id,
+        uint32_t linked_ch_id)
+{
+    int32_t id = 0;
+    mm_camera_obj_t * my_obj = NULL;
+
+    CDBG("%s : E handle = %d ch_id = %d",
+         __func__, camera_handle, ch_id);
+
+    pthread_mutex_lock(&g_intf_lock);
+    my_obj = mm_camera_util_get_camera_by_handler(camera_handle);
+
+    if(my_obj) {
+        pthread_mutex_lock(&my_obj->cam_lock);
+        pthread_mutex_unlock(&g_intf_lock);
+        id = (int32_t)mm_camera_link_stream(my_obj, ch_id, stream_id, linked_ch_id);
+    } else {
+        pthread_mutex_unlock(&g_intf_lock);
+    }
+
+    CDBG("%s :X stream_id = %d", __func__, stream_id);
+    return id;
+}
+
+/*===========================================================================
  * FUNCTION   : mm_camera_intf_add_stream
  *
  * DESCRIPTION: add a stream into a channel
@@ -864,6 +940,76 @@ static int32_t mm_camera_intf_flush_super_buf_queue(uint32_t camera_handle,
 }
 
 /*===========================================================================
+ * FUNCTION   : mm_camera_intf_start_zsl_snapshot
+ *
+ * DESCRIPTION: Starts zsl snapshot
+ *
+ * PARAMETERS :
+ *   @camera_handle: camera handle
+ *   @ch_id        : channel handle
+ *
+ * RETURN     : int32_t type of status
+ *              0  -- success
+ *              -1 -- failure
+ *==========================================================================*/
+static int32_t mm_camera_intf_start_zsl_snapshot(uint32_t camera_handle,
+        uint32_t ch_id)
+{
+    int32_t rc = -1;
+    mm_camera_obj_t * my_obj = NULL;
+
+    CDBG("%s :E camera_handler = %d,ch_id = %d",
+         __func__, camera_handle, ch_id);
+    pthread_mutex_lock(&g_intf_lock);
+    my_obj = mm_camera_util_get_camera_by_handler(camera_handle);
+
+    if(my_obj) {
+        pthread_mutex_lock(&my_obj->cam_lock);
+        pthread_mutex_unlock(&g_intf_lock);
+        rc = mm_camera_start_zsl_snapshot_ch(my_obj, ch_id);
+    } else {
+        pthread_mutex_unlock(&g_intf_lock);
+    }
+    CDBG("%s :X rc = %d", __func__, rc);
+    return rc;
+}
+
+/*===========================================================================
+ * FUNCTION   : mm_camera_intf_stop_zsl_snapshot
+ *
+ * DESCRIPTION: Stops zsl snapshot
+ *
+ * PARAMETERS :
+ *   @camera_handle: camera handle
+ *   @ch_id        : channel handle
+ *
+ * RETURN     : int32_t type of status
+ *              0  -- success
+ *              -1 -- failure
+ *==========================================================================*/
+static int32_t mm_camera_intf_stop_zsl_snapshot(uint32_t camera_handle,
+        uint32_t ch_id)
+{
+    int32_t rc = -1;
+    mm_camera_obj_t * my_obj = NULL;
+
+    CDBG("%s :E camera_handler = %d,ch_id = %d",
+         __func__, camera_handle, ch_id);
+    pthread_mutex_lock(&g_intf_lock);
+    my_obj = mm_camera_util_get_camera_by_handler(camera_handle);
+
+    if(my_obj) {
+        pthread_mutex_lock(&my_obj->cam_lock);
+        pthread_mutex_unlock(&g_intf_lock);
+        rc = mm_camera_stop_zsl_snapshot_ch(my_obj, ch_id);
+    } else {
+        pthread_mutex_unlock(&g_intf_lock);
+    }
+    CDBG("%s :X rc = %d", __func__, rc);
+    return rc;
+}
+
+/*===========================================================================
  * FUNCTION   : mm_camera_intf_configure_notify_mode
  *
  * DESCRIPTION: Configures channel notification mode
@@ -921,7 +1067,7 @@ static int32_t mm_camera_intf_configure_notify_mode(uint32_t camera_handle,
 static int32_t mm_camera_intf_map_buf(uint32_t camera_handle,
                                       uint8_t buf_type,
                                       int fd,
-                                      uint32_t size)
+                                      size_t size)
 {
     int32_t rc = -1;
     mm_camera_obj_t * my_obj = NULL;
@@ -1096,7 +1242,7 @@ static int32_t mm_camera_intf_map_stream_buf(uint32_t camera_handle,
                                              uint32_t buf_idx,
                                              int32_t plane_idx,
                                              int fd,
-                                             uint32_t size)
+                                             size_t size)
 {
     int32_t rc = -1;
     mm_camera_obj_t * my_obj = NULL;
@@ -1189,13 +1335,12 @@ void get_sensor_info()
     int dev_fd = 0;
     struct media_device_info mdev_info;
     int num_media_devices = 0;
-    uint8_t num_cameras = 0;
+    size_t num_cameras = 0;
 
     CDBG("%s : E", __func__);
     /* lock the mutex */
     while (1) {
         char dev_name[32];
-        int num_entities;
         snprintf(dev_name, sizeof(dev_name), "/dev/media%d", num_media_devices);
         dev_fd = open(dev_name, O_RDWR | O_NONBLOCK);
         if (dev_fd <= 0) {
@@ -1219,12 +1364,12 @@ void get_sensor_info()
             continue;
         }
 
-        num_entities = 1;
+        unsigned int num_entities = 1;
         while (1) {
             struct media_entity_desc entity;
-            unsigned long temp;
-            unsigned int mount_angle;
-            unsigned int facing;
+            uint32_t temp;
+            uint32_t mount_angle;
+            uint32_t facing;
 
             memset(&entity, 0, sizeof(entity));
             entity.id = num_entities++;
@@ -1239,17 +1384,17 @@ void get_sensor_info()
                 temp = entity.flags >> 8;
                 mount_angle = (temp & 0xFF) * 90;
                 facing = (temp >> 8);
-                ALOGD("index = %d flag = %x mount_angle = %d facing = %d\n"
-                    , num_cameras, (unsigned int)temp, (unsigned int)mount_angle,
-                    (unsigned int)facing);
-                g_cam_ctrl.info[num_cameras].facing = facing;
-                g_cam_ctrl.info[num_cameras].orientation = mount_angle;
+                ALOGD("index = %u flag = %x mount_angle = %u facing = %u\n",
+                    (unsigned int)num_cameras, (unsigned int)temp,
+                    (unsigned int)mount_angle, (unsigned int)facing);
+                g_cam_ctrl.info[num_cameras].facing = (int)facing;
+                g_cam_ctrl.info[num_cameras].orientation = (int)mount_angle;
                 num_cameras++;
                 continue;
             }
         }
 
-        CDBG("%s: dev_info[id=%d,name='%s']\n",
+        CDBG("%s: dev_info[id=%zu,name='%s']\n",
             __func__, num_cameras, g_cam_ctrl.video_dev_name[num_cameras]);
 
         close(dev_fd);
@@ -1276,18 +1421,108 @@ uint8_t get_num_of_cameras()
     int dev_fd = 0;
     struct media_device_info mdev_info;
     int num_media_devices = 0;
-    uint8_t num_cameras = 0;
+    int8_t num_cameras = 0;
+    char subdev_name[32];
+    int32_t sd_fd = 0;
+    struct sensor_init_cfg_data cfg;
     char prop[PROPERTY_VALUE_MAX];
+    uint32_t temp;
+    uint32_t log_level;
+    uint32_t debug_mask;
 
-    property_get("persist.camera.logs", prop, "1");
-    gMmCameraIntfLogLevel = atoi(prop);
+    /*  Higher 4 bits : Value of Debug log level (Default level is 1 to print all CDBG_HIGH)
+        Lower 28 bits : Control mode for sub module logging(Only 3 sub modules in HAL)
+                        0x1 for HAL
+                        0x10 for mm-camera-interface
+                        0x100 for mm-jpeg-interface  */
+    property_get("persist.camera.hal.debug.mask", prop, "268435463"); // 0x10000007=268435463
+    temp = (uint32_t) atoi(prop);
+    log_level = ((temp >> 28) & 0xF);
+    debug_mask = (temp & HAL_DEBUG_MASK_MM_CAMERA_INTERFACE);
+    if (debug_mask > 0)
+        gMmCameraIntfLogLevel = log_level;
+    else
+        gMmCameraIntfLogLevel = 0; // Debug logs are not required if debug_mask is zero
 
-    CDBG("%s : E", __func__);
+    CDBG_HIGH("%s gMmCameraIntfLogLevel=%d",__func__, gMmCameraIntfLogLevel);
+
+    property_get("vold.decrypt", prop, "0");
+    int decrypt = atoi(prop);
+    if (decrypt == 1)
+     return 0;
+
     /* lock the mutex */
     pthread_mutex_lock(&g_intf_lock);
+
     while (1) {
+        uint32_t num_entities = 1U;
         char dev_name[32];
-        int num_entities;
+
+        snprintf(dev_name, sizeof(dev_name), "/dev/media%d", num_media_devices);
+        dev_fd = open(dev_name, O_RDWR | O_NONBLOCK);
+        if (dev_fd < 0) {
+            CDBG("Done discovering media devices\n");
+            break;
+        }
+        num_media_devices++;
+        rc = ioctl(dev_fd, MEDIA_IOC_DEVICE_INFO, &mdev_info);
+        if (rc < 0) {
+            CDBG_ERROR("Error: ioctl media_dev failed: %s\n", strerror(errno));
+            close(dev_fd);
+            dev_fd = 0;
+            break;
+        }
+
+        if (strncmp(mdev_info.model, "msm_config", sizeof(mdev_info.model) != 0)) {
+            close(dev_fd);
+            dev_fd = 0;
+            continue;
+        }
+
+        while (1) {
+            struct media_entity_desc entity;
+            memset(&entity, 0, sizeof(entity));
+            entity.id = num_entities++;
+            CDBG_ERROR("entity id %d", entity.id);
+            rc = ioctl(dev_fd, MEDIA_IOC_ENUM_ENTITIES, &entity);
+            if (rc < 0) {
+                CDBG_ERROR("Done enumerating media entities");
+                rc = 0;
+                break;
+            }
+            CDBG_ERROR("entity name %s type %d group id %d",
+                entity.name, entity.type, entity.group_id);
+            if (entity.type == MEDIA_ENT_T_V4L2_SUBDEV &&
+                entity.group_id == MSM_CAMERA_SUBDEV_SENSOR_INIT) {
+                snprintf(subdev_name, sizeof(dev_name), "/dev/%s", entity.name);
+                break;
+            }
+        }
+        close(dev_fd);
+        dev_fd = 0;
+    }
+
+    /* Open sensor_init subdev */
+    sd_fd = open(subdev_name, O_RDWR);
+    if (sd_fd < 0) {
+        CDBG_ERROR("Open sensor_init subdev failed");
+        return FALSE;
+    }
+
+    cfg.cfgtype = CFG_SINIT_PROBE_WAIT_DONE;
+    cfg.cfg.setting = NULL;
+    if (ioctl(sd_fd, VIDIOC_MSM_SENSOR_INIT_CFG, &cfg) < 0) {
+        CDBG_ERROR("failed");
+    }
+    close(sd_fd);
+    dev_fd = 0;
+
+
+    num_media_devices = 0;
+    while (1) {
+        uint32_t num_entities = 1U;
+        char dev_name[32];
+
         snprintf(dev_name, sizeof(dev_name), "/dev/media%d", num_media_devices);
         dev_fd = open(dev_name, O_RDWR | O_NONBLOCK);
         if (dev_fd <= 0) {
@@ -1311,7 +1546,6 @@ uint8_t get_num_of_cameras()
             continue;
         }
 
-        num_entities = 1;
         while (1) {
             struct media_entity_desc entity;
             memset(&entity, 0, sizeof(entity));
@@ -1330,7 +1564,7 @@ uint8_t get_num_of_cameras()
         }
 
         CDBG("%s: dev_info[id=%d,name='%s']\n",
-            __func__, num_cameras, g_cam_ctrl.video_dev_name[num_cameras]);
+            __func__, (int)num_cameras, g_cam_ctrl.video_dev_name[num_cameras]);
 
         num_cameras++;
         close(dev_fd);
@@ -1341,14 +1575,55 @@ uint8_t get_num_of_cameras()
     get_sensor_info();
     /* unlock the mutex */
     pthread_mutex_unlock(&g_intf_lock);
-    CDBG("%s: num_cameras=%d\n", __func__, g_cam_ctrl.num_cam);
-    return g_cam_ctrl.num_cam;
+    CDBG("%s: num_cameras=%d\n", __func__, (int)g_cam_ctrl.num_cam);
+    return(uint8_t)g_cam_ctrl.num_cam;
 }
 
-struct camera_info *get_cam_info(int camera_id)
+struct camera_info *get_cam_info(uint32_t camera_id)
 {
     return &g_cam_ctrl.info[camera_id];
 }
+
+/*===========================================================================
+ * FUNCTION   : mm_camera_intf_process_advanced_capture
+ *
+ * DESCRIPTION: Configures channel advanced capture mode
+ *
+ * PARAMETERS :
+ *   @camera_handle: camera handle
+ *   @advanced_capture_type : advanced capture type
+ *   @ch_id        : channel handle
+ *   @notify_mode  : notification mode
+ *
+ * RETURN     : int32_t type of status
+ *              0  -- success
+ *              -1 -- failure
+ *==========================================================================*/
+static int32_t mm_camera_intf_process_advanced_capture(uint32_t camera_handle,
+    mm_camera_advanced_capture_t advanced_capture_type,
+    uint32_t ch_id,
+    int8_t start_flag)
+{
+    int32_t rc = -1;
+    mm_camera_obj_t * my_obj = NULL;
+
+    CDBG("%s: E camera_handler = %d,ch_id = %d",
+         __func__, camera_handle, ch_id);
+    pthread_mutex_lock(&g_intf_lock);
+    my_obj = mm_camera_util_get_camera_by_handler(camera_handle);
+
+    if(my_obj) {
+        pthread_mutex_lock(&my_obj->cam_lock);
+        pthread_mutex_unlock(&g_intf_lock);
+        rc = mm_camera_channel_advanced_capture(my_obj, advanced_capture_type,
+            ch_id, (uint32_t)start_flag);
+    } else {
+        pthread_mutex_unlock(&g_intf_lock);
+    }
+    CDBG("%s: X ", __func__);
+    return rc;
+}
+
 /* camera ops v-table */
 static mm_camera_ops_t mm_camera_ops = {
     .query_capability = mm_camera_intf_query_capability,
@@ -1359,15 +1634,19 @@ static mm_camera_ops_t mm_camera_ops = {
     .do_auto_focus = mm_camera_intf_do_auto_focus,
     .cancel_auto_focus = mm_camera_intf_cancel_auto_focus,
     .prepare_snapshot = mm_camera_intf_prepare_snapshot,
+    .start_zsl_snapshot = mm_camera_intf_start_zsl_snapshot,
+    .stop_zsl_snapshot = mm_camera_intf_stop_zsl_snapshot,
     .map_buf = mm_camera_intf_map_buf,
     .unmap_buf = mm_camera_intf_unmap_buf,
     .add_channel = mm_camera_intf_add_channel,
     .delete_channel = mm_camera_intf_del_channel,
     .get_bundle_info = mm_camera_intf_get_bundle_info,
     .add_stream = mm_camera_intf_add_stream,
+    .link_stream = mm_camera_intf_link_stream,
     .delete_stream = mm_camera_intf_del_stream,
     .config_stream = mm_camera_intf_config_stream,
     .qbuf = mm_camera_intf_qbuf,
+    .get_queued_buf_count = mm_camera_intf_get_queued_buf_count,
     .map_stream_buf = mm_camera_intf_map_stream_buf,
     .unmap_stream_buf = mm_camera_intf_unmap_stream_buf,
     .set_stream_parms = mm_camera_intf_set_stream_parms,
@@ -1377,7 +1656,8 @@ static mm_camera_ops_t mm_camera_ops = {
     .request_super_buf = mm_camera_intf_request_super_buf,
     .cancel_super_buf_request = mm_camera_intf_cancel_super_buf_request,
     .flush_super_buf_queue = mm_camera_intf_flush_super_buf_queue,
-    .configure_notify_mode = mm_camera_intf_configure_notify_mode
+    .configure_notify_mode = mm_camera_intf_configure_notify_mode,
+    .process_advanced_capture = mm_camera_intf_process_advanced_capture
 };
 
 /*===========================================================================
@@ -1426,8 +1706,14 @@ mm_camera_vtbl_t * camera_open(uint8_t camera_idx)
     cam_obj->vtbl.camera_handle = cam_obj->my_hdl; /* set handler */
     cam_obj->vtbl.ops = &mm_camera_ops;
     pthread_mutex_init(&cam_obj->cam_lock, NULL);
+    /* unlock global interface lock, if not, in dual camera use case,
+      * current open will block operation of another opened camera obj*/
+    pthread_mutex_lock(&cam_obj->cam_lock);
+    pthread_mutex_unlock(&g_intf_lock);
 
     rc = mm_camera_open(cam_obj);
+
+    pthread_mutex_lock(&g_intf_lock);
     if(rc != 0) {
         CDBG_ERROR("%s: mm_camera_open err = %d", __func__, rc);
         pthread_mutex_destroy(&cam_obj->cam_lock);

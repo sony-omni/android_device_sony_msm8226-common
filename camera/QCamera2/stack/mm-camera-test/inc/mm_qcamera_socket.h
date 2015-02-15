@@ -1,4 +1,4 @@
-/* Copyright (c) 2013, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -51,15 +51,15 @@
 
 #undef __FD_SET
 #define __FD_SET(fd, fdsetp) \
-  (((fd_set *)(fdsetp))->fds_bits[(fd) >> 5] |= (1<<((fd) & 31)))
+  (((fd_set *)(fdsetp))->fds_bits[(fd) >> 5] |= (1LU<<((fd) & 31)))
 
 #undef __FD_CLR
 #define __FD_CLR(fd, fdsetp) \
-  (((fd_set *)(fdsetp))->fds_bits[(fd) >> 5] &= ~(1<<((fd) & 31)))
+  (((fd_set *)(fdsetp))->fds_bits[(fd) >> 5] &= ~(1LU<<((fd) & 31)))
 
 #undef  __FD_ISSET
 #define __FD_ISSET(fd, fdsetp) \
-  ((((fd_set *)(fdsetp))->fds_bits[(fd) >> 5] & (1<<((fd) & 31))) != 0)
+  ((((fd_set *)(fdsetp))->fds_bits[(fd) >> 5] & (1LU<<((fd) & 31))) != 0)
 
 #undef  __FD_ZERO
 #define __FD_ZERO(fdsetp) \
@@ -72,7 +72,6 @@
 #define TUNESERVER_GET_PARMS 1015
 #define TUNESERVER_SET_PARMS 1016
 #define TUNESERVER_MISC_CMDS 1021
-#define TUNESERVER_STOP 1022
 
 #define TUNE_PREV_GET_INFO        0x0001
 #define TUNE_PREV_CH_CNK_SIZE     0x0002
@@ -120,7 +119,11 @@ typedef struct _eztune_preview_protocol_t {
   uint32_t         new_cmd_available;
 } prserver_protocol_t;
 
-void eztune_server_stop (void* data);
+typedef union {
+  struct sockaddr addr;
+  struct sockaddr_in addr_in;
+} mm_qcamera_sock_addr_t;
+
 int eztune_server_start(void *lib_handle);
 
 #endif /*__MM_QCAMERA_SOCKET_H__*/

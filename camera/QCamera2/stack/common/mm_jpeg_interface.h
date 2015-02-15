@@ -1,4 +1,4 @@
-/* Copyright (c) 2012, 2013 The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2014, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -34,6 +34,7 @@
 
 #define MM_JPEG_MAX_PLANES 3
 #define MM_JPEG_MAX_BUF CAM_MAX_NUM_BUFS_PER_STREAM
+#define MAX_AF_STATS_DATA_SIZE 1000
 
 typedef enum {
   MM_JPEG_FMT_YUV,
@@ -71,6 +72,19 @@ typedef enum {
 
 typedef struct {
   cam_ae_params_t ae_params;
+  cam_auto_focus_data_t af_params;
+  uint8_t af_mobicat_params[MAX_AF_STATS_DATA_SIZE];
+  cam_awb_params_t awb_params;
+  cam_ae_exif_debug_t ae_debug_params;
+  cam_awb_exif_debug_t awb_debug_params;
+  cam_af_exif_debug_t af_debug_params;
+  cam_asd_exif_debug_t asd_debug_params;
+  cam_stats_buffer_exif_debug_t stats_debug_params;
+  uint8_t ae_debug_params_valid;
+  uint8_t awb_debug_params_valid;
+  uint8_t af_debug_params_valid;
+  uint8_t asd_debug_params_valid;
+  uint8_t stats_debug_params_valid;
   cam_sensor_params_t sensor_params;
   cam_flash_mode_t ui_flash_mode;
   exif_flash_func_pre_t flash_presence;
@@ -81,16 +95,16 @@ typedef struct {
   uint32_t sequence;          /* for jpeg bit streams, assembling is based on sequence. sequence starts from 0 */
   uint8_t *buf_vaddr;        /* ptr to buf */
   int fd;                    /* fd of buf */
-  uint32_t buf_size;         /* total size of buf (header + image) */
+  size_t buf_size;         /* total size of buf (header + image) */
   mm_jpeg_format_t format;   /* buffer format*/
   cam_frame_len_offset_t offset; /* offset of all the planes */
-  int index; /* index used to identify the buffers */
+  uint32_t index; /* index used to identify the buffers */
 } mm_jpeg_buf_t;
 
 typedef struct {
   uint8_t *buf_vaddr;        /* ptr to buf */
   int fd;                    /* fd of buf */
-  uint32_t buf_filled_len;   /* used for output image. filled by the client */
+  size_t buf_filled_len;   /* used for output image. filled by the client */
 } mm_jpeg_output_t;
 
 typedef enum {
@@ -102,9 +116,7 @@ typedef enum {
   MM_JPEG_COLOR_FORMAT_YCBCRLP_H1V2,
   MM_JPEG_COLOR_FORMAT_YCRCBLP_H1V1,
   MM_JPEG_COLOR_FORMAT_YCBCRLP_H1V1,
-#ifdef USE_L_CODE
   MM_JPEG_COLOR_FORMAT_MONOCHROME,
-#endif
   MM_JPEG_COLOR_FORMAT_BITSTREAM_H2V2,
   MM_JPEG_COLOR_FORMAT_BITSTREAM_H2V1,
   MM_JPEG_COLOR_FORMAT_BITSTREAM_H1V2,
@@ -144,7 +156,8 @@ typedef struct {
   /* num of buf in src img */
   uint32_t num_dst_bufs;
 
-  int8_t encode_thumbnail;
+  /* should create thumbnail from main image or not */
+  uint32_t encode_thumbnail;
 
   /* src img bufs */
   mm_jpeg_buf_t src_main_buf[MM_JPEG_MAX_BUF];
@@ -171,16 +184,16 @@ typedef struct {
   mm_jpeg_dim_t thumb_dim;
 
   /* rotation informaiton */
-  int rotation;
+  uint32_t rotation;
 
   /* thumb rotation informaiton */
-  int thumb_rotation;
+  uint32_t thumb_rotation;
 
   /* main image dimension */
   mm_jpeg_dim_t main_dim;
 
   /* enable encoder burst mode */
-  int8_t burst_mode;
+  uint32_t burst_mode;
 
   /* get memory function ptr */
   int (*get_memory)( omx_jpeg_ouput_buf_t *p_out_buf);
@@ -215,7 +228,7 @@ typedef struct {
   mm_jpeg_dim_t thumb_dim;
 
   /* rotation informaiton */
-  int rotation;
+  uint32_t rotation;
 
   /* main image dimension */
   mm_jpeg_dim_t main_dim;
@@ -233,16 +246,19 @@ typedef struct {
   /* 3a parameters */
   mm_jpeg_exif_params_t cam_exif_params;
 
+  /* flag to enable/disable mobicat */
+  uint8_t mobicat_mask;
+
 } mm_jpeg_encode_job_t;
 
 typedef struct {
   /* active indices of the buffers for encoding */
-  uint32_t src_index;
-  uint32_t dst_index;
+  int32_t src_index;
+  int32_t dst_index;
   uint32_t tmb_dst_index;
 
   /* rotation informaiton */
-  int rotation;
+  uint32_t rotation;
 
   /* main image  */
   mm_jpeg_dim_t main_dim;
@@ -283,6 +299,9 @@ typedef struct {
 
   /* destroy session */
   int (*destroy_session)(uint32_t session_id);
+
+  /* alloc/free work buffer */
+  int (*realloc_work_buffer)(uint32_t client_hdl, uint32_t alloc);
 
   /* close a jpeg client -- sync call */
   int (*close) (uint32_t clientHdl);
