@@ -30,11 +30,7 @@ TARGET_NO_RADIOIMAGE := true
 TARGET_NO_RECOVERY := false
 TARGET_NO_KERNEL := false
 
-ifeq ($(BUILD_WITH_KERNEL_310),true)
 TARGET_KERNEL_SOURCE := kernel/sony/msm8226
-else
-TARGET_KERNEL_SOURCE := kernel/sony/eagle
-endif
 
 BOARD_KERNEL_BASE        := 0x00000000
 BOARD_KERNEL_PAGESIZE    := 2048
