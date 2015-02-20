@@ -102,6 +102,10 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     libtime_genoff
 
+# Camera
+PRODUCT_PACKAGES += \
+    camera.yukon
+
 # FM radio
 #PRODUCT_PACKAGES += \
 #    qcom.fmradio \
