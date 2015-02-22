@@ -30,7 +30,6 @@ PRODUCT_COPY_FILES += \
     $(SONY_ROOT)/system/usr/keylayout/gpio-keys.kl:system/usr/keylayout/gpio-keys.kl \
     $(SONY_ROOT)/system/etc/wifi/wpa_supplicant_overlay.conf:system/etc/wifi/wpa_supplicant_overlay.conf \
     $(SONY_ROOT)/system/etc/wifi/p2p_supplicant_overlay.conf:system/etc/wifi/p2p_supplicant_overlay.conf \
-    $(SONY_ROOT)/system/etc/init.qcom.fm.sh:system/etc/init.qcom.fm.sh \
     $(SONY_ROOT)/system/etc/init.yukon.bt.sh:system/etc/init.yukon.bt.sh \
     $(SONY_ROOT)/system/etc/init.yukon.wifi.sh:system/etc/init.yukon.wifi.sh \
     $(SONY_ROOT)/system/etc/gps.conf:system/etc/gps.conf \
@@ -101,13 +100,6 @@ PRODUCT_PACKAGES += \
 # Time
 PRODUCT_PACKAGES += \
     libtime_genoff
-
-# FM radio
-#PRODUCT_PACKAGES += \
-#    qcom.fmradio \
-#    libqcomfm_jni \
-#    FM2 \
-#    FMRecord
 
 #GFX
 PRODUCT_PACKAGES += \
