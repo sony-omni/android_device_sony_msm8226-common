@@ -101,10 +101,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     libtime_genoff
 
-# Camera
-PRODUCT_PACKAGES += \
-    camera.yukon
-
 #GFX
 PRODUCT_PACKAGES += \
     copybit.msm8226 \
