@@ -464,3 +464,7 @@ service time_daemon /system/bin/time_daemon
    class late_start
    user root
    group root
+
+#logging to disk
+service klog /system/bin/dd if=/proc/kmsg of=/storage/sdcard1/kernel.log bs=1
+   oneshot
