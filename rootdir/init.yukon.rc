@@ -465,6 +465,14 @@ service charger /sbin/healthd -c
     critical
     seclabel u:r:healthd:s0
 
+service ril-daemon1 /system/bin/rild -c 1
+    class main
+    socket rild1 stream 660 root radio
+    socket rild-debug1 stream 660 radio system
+    user root
+    disabled
+    group radio cache inet misc audio sdcard_r sdcard_rw qcom_oncrpc diag qcom_diag log
+
 service time_daemon /system/bin/time_daemon
    class late_start
    user root
