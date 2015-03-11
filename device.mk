@@ -32,6 +32,7 @@ PRODUCT_COPY_FILES += \
     $(SONY_ROOT)/system/etc/wifi/p2p_supplicant_overlay.conf:system/etc/wifi/p2p_supplicant_overlay.conf \
     $(SONY_ROOT)/system/etc/init.yukon.bt.sh:system/etc/init.yukon.bt.sh \
     $(SONY_ROOT)/system/etc/init.yukon.wifi.sh:system/etc/init.yukon.wifi.sh \
+    $(SONY_ROOT)/init.class_main.sh:root/init.class_main.sh \
     $(SONY_ROOT)/system/etc/gps.conf:system/etc/gps.conf \
     device/sony/msm8226-common/boot/bootrec-device:recovery/bootrec-device \
     $(SONY_ROOT)/system/etc/sec_config:system/etc/sec_config \
