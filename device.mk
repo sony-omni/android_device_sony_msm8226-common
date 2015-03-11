@@ -181,6 +181,8 @@ PRODUCT_PACKAGES += \
 
 #OSS
 PRODUCT_PACKAGES += \
+    timekeep \
+    TimeKeep \
     thermanager \
     addrsetup
 
