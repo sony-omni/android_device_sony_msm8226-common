@@ -113,6 +113,9 @@ PRODUCT_PACKAGES += \
     libqdutils \
     libqdMetaData
 
+PRODUCT_PACKAGES += \
+    libion
+
 #lights
 PRODUCT_PACKAGES += \
     lights.yukon
