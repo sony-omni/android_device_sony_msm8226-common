@@ -211,16 +211,25 @@ PRODUCT_PACKAGES += \
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     persist.sys.usb.config=mtp
 
-# Platform specific properties
-PRODUCT_PROPERTY_OVERRIDES += \
-    ro.qualcomm.bt.hci_transport=smd
+# Platform specific tags
+#
+PRODUCT_TAGS += dalvik.gc.type-precise
 
 # Get the long list of apns
 PRODUCT_COPY_FILES += device/sample/etc/apns-full-conf.xml:system/etc/apns-conf.xml
 
+# Platform specific properties
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.qualcomm.bt.hci_transport=smd
+
 # QC Perf
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.vendor.extension_library=/vendor/lib/libqc-opt.so
+
+# Platform specific default properties
+#
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+    persist.sys.usb.config=mtp
 
 # msm8226 common
 $(call inherit-product, vendor/sony/msm8226-common/msm8226-common-vendor.mk)
