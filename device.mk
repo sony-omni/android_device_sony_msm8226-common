@@ -120,6 +120,16 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     lights.yukon
 
+# Camera
+PRODUCT_PACKAGES += \
+    camera.yukon \
+    mm-qcamera-app \
+    libmmcamera_interface \
+    libmm-qcamera \
+    libmmjpeg_interface \
+    libqomx_core
+
+
 # NFC packages
 PRODUCT_PACKAGES += \
     com.android.nfc_extras \
