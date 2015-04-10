@@ -100,7 +100,6 @@ PRODUCT_PACKAGES += \
 
 # Camera
 PRODUCT_PACKAGES += \
-    camera.yukon \
     mm-qcamera-app \
     libmmcamera_interface \
     libmm-qcamera \
