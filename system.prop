@@ -3,7 +3,8 @@ debug.composition.type=dyn
 debug.egl.hw=1
 debug.mdpcomp.logs=0
 debug.sf.hw=1
-
+dev.pm.dyn_samplingrate=1
+persist.hwc.mdpcomp.enable=true
 persist.fuse_sdcard=true
 ril.subscription.types=NV,RUIM
 rild.libargs=-d /dev/smd0
